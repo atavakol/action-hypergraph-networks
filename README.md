@@ -1,2 +1,3 @@
-# action-hypergraph-networks
-Learning to Represent Action Values as a Hypergraph on the Action Vertices
+# Learning to Represent Action Values as a Hypergraph on the Action Vertices
+
+Source code for the experiments of our [ICLR 2021 paper](https://openreview.net/forum?id=Xv_s64FiXTv) coming soon...
