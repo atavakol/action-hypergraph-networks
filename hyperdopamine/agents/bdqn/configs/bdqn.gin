@@ -1,0 +1,54 @@
+# Hyperparameters of a BDQN agent (Tavakoli et al., 2018) for continuous control problems.
+import hyperdopamine.interfaces.environment_metadata
+import hyperdopamine.interfaces.multi_cont_lib
+import hyperdopamine.interfaces.run_experiment
+import hyperdopamine.agents.bdqn.bdqn_agent
+import hyperdopamine.agents.networks
+import hyperdopamine.replay_memory.prioritized_replay_buffer
+import gin.tf.external_configurables
+
+create_discretised_environment.environment_name = 'hopper_hop'
+create_discretised_environment.version = %environment_metadata.HOPPER_HOP_ENV_VER
+Runner.max_steps_per_episode = %environment_metadata.HOPPER_HOP_TIMELIMIT
+BDQNAgent.observation_shape = %environment_metadata.HOPPER_HOP_OBSERVATION_SHAPE
+WrappedPrioritizedReplayBuffer.action_shape = %environment_metadata.HOPPER_HOP_ACTION_SHAPE
+
+create_agent.agent_name = 'bdqn'
+BDQNAgent.observation_dtype = %networks.OBSERVATION_DTYPE_FLOAT32
+BDQNAgent.stack_size = %networks.STACK_SIZE_1
+BDQNAgent.network = @networks.branching_network
+BDQNAgent.target_aggregator = 'mean'  # 'indep' and 'max' supported too
+BDQNAgent.use_dueling = False
+BDQNAgent.double_dqn = False  # True not implemented
+BDQNAgent.gamma = 0.99
+BDQNAgent.update_horizon = 1
+BDQNAgent.min_replay_history = 10000
+BDQNAgent.update_period = 1
+BDQNAgent.target_update_period = 2000
+BDQNAgent.epsilon_train = 0.05
+BDQNAgent.epsilon_eval = 0.001
+BDQNAgent.epsilon_decay_period = 50000  # agent steps
+BDQNAgent.replay_scheme = 'uniform'  # 'prioritized' not implemented
+BDQNAgent.tf_device = '/cpu:*'  # use '/gpu:0' for GPU version
+BDQNAgent.loss_type = 'MSE'  # 'Huber' supported too
+BDQNAgent.optimizer = @tf.train.AdamOptimizer()
+
+tf.train.AdamOptimizer.learning_rate = 0.00001
+tf.train.AdamOptimizer.epsilon = 0.0003125
+
+create_discretised_environment.action_rep = 'branching'
+create_discretised_environment.num_sub_actions = 5
+create_discretised_environment.environment_seed = 0
+
+# Use TrainRunner for train-only schedule or Runner for train-and-eval schedule, 
+# only needed for `create_environment_fn`.
+Runner.create_environment_fn = @multi_cont_lib.create_discretised_environment
+Runner.agent_seed = 0
+Runner.num_iterations = 300
+Runner.training_steps = 10000
+Runner.evaluation_steps = 5000
+Runner.render = False
+Runner.reward_clipping = False
+
+WrappedPrioritizedReplayBuffer.replay_capacity = 100000
+WrappedPrioritizedReplayBuffer.batch_size = 64

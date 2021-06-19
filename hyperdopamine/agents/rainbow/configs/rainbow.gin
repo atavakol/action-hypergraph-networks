@@ -1,0 +1,54 @@
+# Hyperparameters of a simplified Rainbow agent for continuous control problems.
+import hyperdopamine.interfaces.environment_metadata
+import hyperdopamine.interfaces.multi_cont_lib
+import hyperdopamine.interfaces.run_experiment
+import hyperdopamine.agents.rainbow.rainbow_agent
+import hyperdopamine.agents.networks
+import hyperdopamine.replay_memory.prioritized_replay_buffer
+import gin.tf.external_configurables
+
+create_discretised_environment.environment_name = 'hopper_hop'
+create_discretised_environment.version = %environment_metadata.HOPPER_HOP_ENV_VER
+Runner.max_steps_per_episode = %environment_metadata.HOPPER_HOP_TIMELIMIT
+RainbowAgent.observation_shape = %environment_metadata.HOPPER_HOP_OBSERVATION_SHAPE
+
+create_agent.agent_name = 'rainbow'
+RainbowAgent.observation_dtype = %networks.OBSERVATION_DTYPE_FLOAT32
+RainbowAgent.stack_size = %networks.STACK_SIZE_1
+RainbowAgent.network = @networks.hgqn_network
+RainbowAgent.hyperedge_orders = '[-1]'
+RainbowAgent.mixer = None
+RainbowAgent.use_dueling = True
+RainbowAgent.double_dqn = True
+RainbowAgent.gamma = 0.99
+RainbowAgent.update_horizon = 3
+RainbowAgent.min_replay_history = 10000
+RainbowAgent.update_period = 1
+RainbowAgent.target_update_period = 2000
+RainbowAgent.epsilon_train = 0.05
+RainbowAgent.epsilon_eval = 0.001
+RainbowAgent.epsilon_decay_period = 50000  # agent steps
+RainbowAgent.replay_scheme = 'prioritized'
+RainbowAgent.tf_device = '/cpu:*'  # use '/gpu:0' for GPU version
+RainbowAgent.loss_type = 'MSE'  # 'Huber' supported too
+RainbowAgent.optimizer = @tf.train.AdamOptimizer()
+
+tf.train.AdamOptimizer.learning_rate = 0.00001
+tf.train.AdamOptimizer.epsilon = 0.0003125
+
+create_discretised_environment.action_rep = 'composite'
+create_discretised_environment.num_sub_actions = 5
+create_discretised_environment.environment_seed = 0
+
+# Use TrainRunner for train-only schedule or Runner for train-and-eval schedule, 
+# only needed for `create_environment_fn`.
+Runner.create_environment_fn = @multi_cont_lib.create_discretised_environment
+Runner.agent_seed = 0
+Runner.num_iterations = 300
+Runner.training_steps = 10000
+Runner.evaluation_steps = 5000
+Runner.render = False
+Runner.reward_clipping = False
+
+WrappedPrioritizedReplayBuffer.replay_capacity = 100000
+WrappedPrioritizedReplayBuffer.batch_size = 64

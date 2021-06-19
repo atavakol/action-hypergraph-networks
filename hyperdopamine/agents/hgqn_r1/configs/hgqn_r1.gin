@@ -1,0 +1,56 @@
+# Hyperparameters of a rank-1 monotonic-mixer HGQN agent for continuous control problems.
+import hyperdopamine.interfaces.environment_metadata
+import hyperdopamine.interfaces.multi_cont_lib
+import hyperdopamine.interfaces.run_experiment
+import hyperdopamine.agents.hgqn_r1.hgqn_r1_agent
+import hyperdopamine.agents.networks
+import hyperdopamine.replay_memory.prioritized_replay_buffer
+import gin.tf.external_configurables
+
+create_discretised_environment.environment_name = 'hopper_hop'
+create_discretised_environment.version = %environment_metadata.HOPPER_HOP_ENV_VER
+Runner.max_steps_per_episode = %environment_metadata.HOPPER_HOP_TIMELIMIT
+HGQNr1Agent.observation_shape = %environment_metadata.HOPPER_HOP_OBSERVATION_SHAPE
+WrappedPrioritizedReplayBuffer.action_shape = %environment_metadata.HOPPER_HOP_ACTION_SHAPE
+
+create_agent.agent_name = 'hgqn_r1'
+HGQNr1Agent.observation_dtype = %networks.OBSERVATION_DTYPE_FLOAT32
+HGQNr1Agent.stack_size = %networks.STACK_SIZE_1
+HGQNr1Agent.network = @networks.branching_network
+# The mixer can be any monotonic function: sum_mixer, monotonic_linear_mixer, 
+# or monotonic_nonlinear_mixer.
+HGQNr1Agent.mixing_network = @networks.sum_mixer
+HGQNr1Agent.use_dueling = False
+HGQNr1Agent.double_dqn = False  # True not implemented
+HGQNr1Agent.gamma = 0.99
+HGQNr1Agent.update_horizon = 1
+HGQNr1Agent.min_replay_history = 10000
+HGQNr1Agent.update_period = 1
+HGQNr1Agent.target_update_period = 2000
+HGQNr1Agent.epsilon_train = 0.05
+HGQNr1Agent.epsilon_eval = 0.001
+HGQNr1Agent.epsilon_decay_period = 50000  # agent steps
+HGQNr1Agent.replay_scheme = 'uniform'  # 'prioritized' not implemented
+HGQNr1Agent.tf_device = '/cpu:*'  # use '/gpu:0' for GPU version
+HGQNr1Agent.loss_type = 'MSE'  # 'Huber' supported too
+HGQNr1Agent.optimizer = @tf.train.AdamOptimizer()
+
+tf.train.AdamOptimizer.learning_rate = 0.00001
+tf.train.AdamOptimizer.epsilon = 0.0003125
+
+create_discretised_environment.action_rep = 'branching'
+create_discretised_environment.num_sub_actions = 5
+create_discretised_environment.environment_seed = 0
+
+# Use TrainRunner for train-only schedule or Runner for train-and-eval schedule, 
+# only needed for `create_environment_fn`.
+Runner.create_environment_fn = @multi_cont_lib.create_discretised_environment
+Runner.agent_seed = 0
+Runner.num_iterations = 300
+Runner.training_steps = 10000
+Runner.evaluation_steps = 5000
+Runner.render = False
+Runner.reward_clipping = False
+
+WrappedPrioritizedReplayBuffer.replay_capacity = 100000
+WrappedPrioritizedReplayBuffer.batch_size = 64

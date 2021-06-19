@@ -1,0 +1,49 @@
+# Hyperparameters of a DQN agent for Atari 2600 games.
+import hyperdopamine.interfaces.atari_lib
+import hyperdopamine.interfaces.run_experiment
+import hyperdopamine.agents.dqn.dqn_agent
+import hyperdopamine.agents.networks
+import hyperdopamine.replay_memory.circular_replay_buffer
+import gin.tf.external_configurables
+
+DQNAgent.network = @networks.atari_dqn_network
+DQNAgent.hyperedge_orders = None
+DQNAgent.mixer = None
+DQNAgent.use_dueling = False
+DQNAgent.gamma = 0.99
+DQNAgent.update_horizon = 1
+DQNAgent.min_replay_history = 20000  # agent steps
+DQNAgent.update_period = 4
+DQNAgent.target_update_period = 8000  # agent steps
+DQNAgent.epsilon_train = 0.01
+DQNAgent.epsilon_eval = 0.001
+DQNAgent.epsilon_decay_period = 250000  # agent steps
+DQNAgent.tf_device = '/gpu:0'  # use '/cpu:*' for non-GPU version
+DQNAgent.optimizer = @tf.train.RMSPropOptimizer()
+
+tf.train.RMSPropOptimizer.learning_rate = 0.00025
+tf.train.RMSPropOptimizer.decay = 0.95
+tf.train.RMSPropOptimizer.momentum = 0.0
+tf.train.RMSPropOptimizer.epsilon = 0.00001
+tf.train.RMSPropOptimizer.centered = True
+
+atari_lib.create_atari_environment.game_name = 'Boxing'
+atari_lib.create_atari_environment.sticky_actions = True
+create_agent.agent_name = 'dqn'
+Runner.num_iterations = 200
+Runner.training_steps = 250000  # agent steps
+Runner.evaluation_steps = 125000  # agent steps
+Runner.max_steps_per_episode = 27000  # agent steps
+
+WrappedReplayBuffer.replay_capacity = 1000000
+WrappedReplayBuffer.batch_size = 32
+
+# Use TrainRunner for train-only schedule or Runner for train-and-eval schedule, 
+# only needed for `create_environment_fn`.
+TrainRunner.create_environment_fn = @atari_lib.create_atari_environment
+atari_lib.create_atari_environment.action_rep = 'cartesian_composite'  # or 'gym_composite'
+atari_lib.create_atari_environment.environment_seed = 0
+Runner.agent_seed = 0
+Runner.render = False
+DQNAgent.loss_type = 'Huber'
+Runner.reward_clipping = True
