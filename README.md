@@ -233,14 +233,24 @@ Shortly after launching the code, a visualisation window pops open for a previou
 
 ## Plot Results
 
-This repository also contains the performance logs of the agents in the physical control environments of the [paper][this_paper]. In addition, we release unpublished results on the OpenAI-Gym's *Humanoid* environment and a full evaluation of our implementation of the *Branching-DQN* (**BDQN**) agent ([Tavakoli et al., 2018][branching]). Run the following command to plot the full benchmark:   
+This repository also contains the performance logs of the agents in the Atari 2600 games and physical control environments of the [paper][this_paper]. In addition, we release unpublished results on the OpenAI-Gym's *Humanoid* environment and a full evaluation of our implementation of the *Branching-DQN* (**BDQN**) agent ([Tavakoli et al., 2018][branching]) in the physical control environments. Run the following command to plot the full physical-control benchmark:   
 
 ```sh
-python plot_benchmark.py
+python plot_physical.py
 ```
 
 <p align="center">
-<img width="90%" src="./data/images/continuous_control_results.png">
+<img width="90%" src="./data/images/physical_results.png">
+</p>
+
+To plot the Atari 2600 benchmark, run the following command:
+
+```sh
+python plot_atari.py
+```
+
+<p align="center">
+<img width="90%" src="./data/images/atari_results.png">
 </p>
 
 
@@ -262,7 +272,7 @@ In *Proceedings of the 32nd AAAI Conference on Artificial Intelligence*, pp. 321
 Action branching architectures for deep reinforcement learning. 
 In *Proceedings of the 32nd AAAI Conference on Artificial Intelligence*, pp. 4131-4138.][branching]
 
-[Pardo et al. (2018)
+[Pardo et al. (2018).
 Time limits in reinforcement learning.
 In *Proceedings of the 35th International Conference on Machine Learning*, pp. 4045-4054.][time_limits]
 

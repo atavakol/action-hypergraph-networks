@@ -9,7 +9,7 @@ plt.rcParams.update({'font.size': 10})
 plt.rcParams['font.family'] = 'Times New Roman, serif'
 
 
-BASE_PATH = './data/benchmark'
+BASE_PATH = './data/benchmark/physical'
 GAMES = [
     'ReacherBulletEnv', 
     'HopperBulletEnv', 
@@ -19,7 +19,6 @@ GAMES = [
     'Humanoid']
 SEEDS = [str(i) for i in range(0,9)]
 MAX_EPOCH = 300
-
 
 TITLES = {
     'ReacherBulletEnv': r'Reacher', 
@@ -114,11 +113,6 @@ for game_id, game in enumerate(GAMES):
     for seed in SEEDS:
       log_path = BASE_PATH + '/{}/{}/{}/logs'.format(game, agent, seed)
       raw_data, _ = plot_utils.load_statistics(log_path, verbose=False)
-      if raw_data is None: 
-        iteration_number = plot_utils.get_latest_iteration(log_path)
-        raw_data, _ = plot_utils.load_statistics(
-            log_path, iteration_number=iteration_number-1, verbose=False)
-        assert raw_data is not None
       summarized_data = plot_utils.summarize_data(raw_data, ['eval_episode_returns'])
       agent_game_data.append(summarized_data['eval_episode_returns'][:MAX_EPOCH])
 
@@ -145,5 +139,5 @@ new_labels = \
 ax[4].legend(new_handles, new_labels, bbox_to_anchor=(0.5, -0.3), loc='upper center', 
     ncol=4, frameon=False, markerscale=2., fontsize=14)
 
-plt.savefig('continuous_control_results.pdf')
+plt.savefig('physical_results.pdf')
 print('figure saved')
